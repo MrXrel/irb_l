@@ -23,7 +23,7 @@ int transfer_to_int(const char* str, int* result) {
         }
         if (!(str[i] >= '0' && str[i] <= '9')) {
             print_chars(str);
-            printf(" not a number\n");
+            printf(" not an integer\n");
             return -1;
         }
 
