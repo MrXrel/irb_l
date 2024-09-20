@@ -43,7 +43,7 @@ double calculate_b(double eps, double x) {
     long n_fact = 1;
     long count = 0;
     double result = 0;
-    double add = 20;
+    double add = eps + 1;
     long i = 0;
     do {
         add = (x_value / n_fact);
@@ -63,6 +63,50 @@ double calculate_b(double eps, double x) {
     return result;
 }
 
+double calculate_c(double eps, double x) {
+    double add = eps + 1, result = 0, x_value = 1;
+    long n3_fact = 1, degree3 = 1, n_square_fact = 1;
+    long count1 = 0, count3 = 0;
+
+    do {
+        add = (degree3 / n3_fact) * x_value * n_square_fact;
+        result += add;
+
+        x_value *= (x * x);
+        degree3 *= 27;
+
+        n3_fact *= ((count3 + 1) * (count3 + 2) * (count3 + 3));
+        n3_fact /= (count1 + 1);
+        count3 += 3;
+
+        ++count1;
+        n_square_fact *= (count1 * count1);
+    } while (add > eps);
+
+    return result;
+}
+
+double calculate_d(double eps, double x) {
+    double add = eps + 1, result = 0, x_value = x * x;
+    long n_2_fact = 2, count = 2, i = 1;
+    
+    do {
+        add = x_value / n_2_fact;
+        if (i % 2 == 0) {
+            result += add;
+        } else {
+            result -= add;
+        }
+
+        x_value *= (x * x);
+        n_2_fact *= ((count + 1) * (count + 2));
+        count += 2;
+        ++i;
+    } while (add > eps);
+
+    return result;
+}
+
 int main(int argc, char *argv[]) {
     if (argc != 3) {
         printf("Not enough arguments\n");
@@ -73,6 +117,5 @@ int main(int argc, char *argv[]) {
     if (res1 + res2 != 0) {
         return -1;
     }
-    printf("%.15f\n", calculate_b(eps, x));
-    printf("%.15f\n", cos(x));
+    printf("%.15f\n", calculate_d(eps, x));
 }
