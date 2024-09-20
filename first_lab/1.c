@@ -4,6 +4,14 @@
 #include <string.h>
 
 typedef int (*callback)(int, const char*);
+enum ERROR {
+    NOT_AN_INTEGER_ERROR = 1,
+    OVERFLOW_ERROR = 2,
+    NEGATIVE_OR_ZERO_ERROR = 3,
+    NOT_IN_RANGE_1_10_ERROR = 4,
+    WRONG_FLAG_ERROR = 5,
+    WRONG_AMOUNT_OF_ARGUMENTS_ERROR = 6
+};
 
 int print_chars(const char* str) {
     int len = strlen(str);
@@ -22,14 +30,11 @@ int transfer_to_int(const char* str, int* result) {
             continue;
         }
         if (!(str[i] >= '0' && str[i] <= '9')) {
-            print_chars(str);
-            printf(" not an integer\n");
-            return -1;
+            return NOT_AN_INTEGER_ERROR;
         }
 
         if (*result > (INT_MAX - (str[i] - '0')) / 10) {
-            printf("Overflow detected\n");
-            return -1;
+            return OVERFLOW_ERROR;
         }
 
         *result *= 10;
@@ -58,7 +63,7 @@ int for_p(int num, const char* str) {
 int for_h(int num, const char* str) {
     if ((abs(num) > 100) || (num == 0)) {
         printf("There are no natural numbers within 100 that are multiples of the number %d", num);
-        return -1;
+        return 0;
     }
 
     int count = 1;
@@ -128,8 +133,7 @@ int for_s(int num, const char* str) {
 
 int for_a(int num, const char* str) {
     if (num <= 0) {
-        printf("Number %d should be positive", num);
-        return -1;
+        return NEGATIVE_OR_ZERO_ERROR;
     }
     long ans = 0;
     ans = (1 + num) * num / 2;
@@ -140,8 +144,7 @@ int for_a(int num, const char* str) {
 
 int for_f(int num, const char* str) {
     if (num < 0) {
-        printf("Number %d should be positive or zero", num);
-        return -1;
+        return NEGATIVE_OR_ZERO_ERROR;
     }
     long ans = 1;
     if (num == 0) {
@@ -156,6 +159,9 @@ int for_f(int num, const char* str) {
 }
 
 int for_e(int num, const char* str) {
+    if (!(num >= 1 && num <= 10)) {
+        return NOT_IN_RANGE_1_10_ERROR;
+    }
     for (int i = 1; i <= 10; ++i) {
         long res = 1;
         for (int exp = 1; exp <= num; ++exp) {
@@ -187,14 +193,24 @@ int main(int argc, char* argv[]) {
     if (argc != 3) {
         printf("Wrong amount of parameters\n");
         printf("E.X -f 5\n");
-        return -1;
+        return WRONG_AMOUNT_OF_ARGUMENTS_ERROR;
     }
 
     int num = 0;
     int res = transfer_to_int(argv[1], &num);
 
-    if (res == -1) {
-        return -1;
+    switch (res) {
+        case NOT_AN_INTEGER_ERROR:
+            print_chars(argv[1]);
+            printf(" not an integer\n");
+            return NOT_AN_INTEGER_ERROR;
+
+        case OVERFLOW_ERROR:
+            printf("Overflow detected\n");
+            return OVERFLOW_ERROR;
+
+        default:
+            break;
     }
 
     int flag_res =
@@ -202,11 +218,24 @@ int main(int argc, char* argv[]) {
 
     if (flag_res == -1) {
         printf("Unknown flag %s\n", argv[2]);
-        return -1;
+        return WRONG_FLAG_ERROR;
     }
     callback found_callback = callbacks[flag_res / 2];
 
-    found_callback(num, argv[1]);
+    res = found_callback(num, argv[1]);
+
+    switch (res) {
+        case NEGATIVE_OR_ZERO_ERROR:
+            printf("Number %d should be positive\n", num);
+            return NEGATIVE_OR_ZERO_ERROR;
+
+        case NOT_IN_RANGE_1_10_ERROR:
+            printf("Number %d shoud be in range [1, 10]\n", num);
+            return NOT_AN_INTEGER_ERROR;
+
+        default:
+            break;
+    }
 
     printf("\n");
     return 0;
