@@ -3,6 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+enum ERROR {
+    SUM_OF_SERIES_IS_NOT_CONVERGE_ERROR = 1,
+    NOT_A_DOUBLE_NUM_ERROR = 2,
+};
+
 int print_chars(const char *str) {
     int len = strlen(str);
     for (int i = 0; i < len; ++i) {
@@ -18,35 +23,31 @@ int transfer_to_double(const char *str, double *num) {
     if (*endptr != '\0') {
         print_chars(str);
         printf(" is not a number\n");
-        return -1;
+        return NOT_A_DOUBLE_NUM_ERROR;
     }
     *num = value;
     return 0;
 }
 
 double calculate_a(double eps, double x) {
-    double x_value = 1;
-    long n_fact = 1;
-    long count = 0;
-    double result = 0;
+    double x_value = 1, result = 0, add = 2 * eps;
+    long n_fact = 1, count = 0;
     do {
+        add = (x_value / n_fact);
         result += (x_value / n_fact);
         ++count;
         x_value *= x;
         n_fact *= count;
-    } while (x_value / n_fact > eps);
+    } while (fabs(add) > eps);
     return result;
 }
 
 double calculate_b(double eps, double x) {
-    double x_value = 1;
-    long n_fact = 1;
-    long count = 0;
-    double result = 0;
-    double add = eps + 1;
-    long i = 0;
+    double x_value = 1, result = 0, add = 2 * eps;
+    long n_fact = 1, count = 0, i = 0;
     do {
         add = (x_value / n_fact);
+        
         if ((i % 2) == 0) {
             result += add;
         } else {
@@ -58,31 +59,31 @@ double calculate_b(double eps, double x) {
 
         count += 2;
         ++i;
-    } while (add > eps);
+    } while (fabs(add) > eps);
 
     return result;
 }
 
 double calculate_c(double eps, double x) {
-    double add = eps + 1, result = 0, x_value = 1;
+    double add = 2 * eps, result = 0, x_value = 1;
     long n3_fact = 1, degree3 = 1, n_square_fact = 1;
     long count1 = 0, count3 = 0;
 
     do {
-        add = (degree3 / n3_fact) * x_value * n_square_fact;
+        add = (x_value / n3_fact) * degree3 * n_square_fact;
+
         result += add;
 
         x_value *= (x * x);
         degree3 *= 27;
-
+        
         n3_fact *= ((count3 + 1) * (count3 + 2) * (count3 + 3));
         n3_fact /= (count1 + 1);
         count3 += 3;
 
         ++count1;
         n_square_fact *= (count1 * count1);
-    } while (add > eps);
-
+    } while (fabs(add) > eps);
     return result;
 }
 
@@ -102,7 +103,7 @@ double calculate_d(double eps, double x) {
         n_2_fact *= ((count + 1) * (count + 2));
         count += 2;
         ++i;
-    } while (add > eps);
+    } while (fabs(add) > eps);
 
     return result;
 }
@@ -110,6 +111,7 @@ double calculate_d(double eps, double x) {
 int main(int argc, char *argv[]) {
     if (argc != 3) {
         printf("Not enough arguments\n");
+        return -1;
     }
     double eps, x;
     int res1 = transfer_to_double(argv[1], &eps);
